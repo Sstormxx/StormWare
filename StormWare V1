@@ -1,0 +1,572 @@
+local function ACESN_fake_script() -- Frame.LocalScript 
+	local script = Instance.new('LocalScript', Frame)
+
+	Frame.Active = true
+	Frame.Draggable = true
+end
+coroutine.wrap(ACESN_fake_script)()
+local function TORJBN_fake_script() -- JumpButton.LocalScript 
+	local script = Instance.new('LocalScript', JumpButton)
+
+	-- LocalScript inside the "JumpButton"
+	
+	-- Define the jump power value
+	local jumpPower = 100
+	local defaultJumpPower = 50 -- Default Roblox jump power
+	local jumpPowerEnabled = false
+	
+	-- Function to toggle jump power on and off
+	local function toggleJumpPower()
+		jumpPowerEnabled = not jumpPowerEnabled
+		local character = game.Players.LocalPlayer.Character
+		if character then
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				if jumpPowerEnabled then
+					humanoid.JumpPower = jumpPower
+				else
+					humanoid.JumpPower = defaultJumpPower
+				end
+			end
+		end
+	end
+	
+	-- Connect toggle function to button click
+	script.Parent.MouseButton1Click:Connect(toggleJumpPower)
+	
+	-- Check if player respawns and set jump power accordingly
+	game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+		if jumpPowerEnabled then
+			local humanoid = character:WaitForChild("Humanoid")
+			humanoid.JumpPower = jumpPower
+		else
+			local humanoid = character:WaitForChild("Humanoid")
+			humanoid.JumpPower = defaultJumpPower
+		end
+	end)
+	
+	-- Ensure the jump power is set correctly if the script is reloaded while the character already exists
+	if game.Players.LocalPlayer.Character then
+		local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			if jumpPowerEnabled then
+				humanoid.JumpPower = jumpPower
+			else
+				humanoid.JumpPower = defaultJumpPower
+			end
+		end
+	end
+end
+coroutine.wrap(TORJBN_fake_script)()
+local function RDPIQ_fake_script() -- NoclipButton.LocalScript 
+	local script = Instance.new('LocalScript', NoclipButton)
+
+	local noclipEnabled = false
+	local player = game.Players.LocalPlayer
+	local character = player.Character or player.CharacterAdded:Wait()
+	
+	-- Function to set noclip state
+	local function setNoclip(state)
+		noclipEnabled = state
+		if noclipEnabled then
+			-- Disable collisions
+			for _, part in pairs(character:GetDescendants()) do
+				if part:IsA("BasePart") and part.CanCollide then
+					part.CanCollide = false
+				end
+			end
+		else
+			-- Enable collisions
+			for _, part in pairs(character:GetDescendants()) do
+				if part:IsA("BasePart") and not part.CanCollide then
+					part.CanCollide = true
+				end
+			end
+		end
+	end
+	
+	-- Function to toggle noclip on and off
+	local function toggleNoclip()
+		noclipEnabled = not noclipEnabled
+		setNoclip(noclipEnabled)
+	end
+	
+	-- Connect toggle function to button click
+	script.Parent.MouseButton1Click:Connect(toggleNoclip)
+	
+	-- Ensure noclip is set correctly when the character respawns
+	player.CharacterAdded:Connect(function(newCharacter)
+		character = newCharacter
+		if noclipEnabled then
+			setNoclip(true)
+		end
+	end)
+	
+	-- Initial setting for character's collisions
+	if noclipEnabled then
+		setNoclip(true)
+	end
+	
+	-- Persist noclip state across respawns
+	game:GetService("RunService").Stepped:Connect(function()
+		if noclipEnabled and character then
+			for _, part in pairs(character:GetDescendants()) do
+				if part:IsA("BasePart") and part.CanCollide then
+					part.CanCollide = false
+				end
+			end
+		end
+	end)
+end
+coroutine.wrap(RDPIQ_fake_script)()
+local function QNSPNQY_fake_script() -- FlyButton.LocalScript 
+	local script = Instance.new('LocalScript', FlyButton)
+
+	local UserInputService = game:GetService("UserInputService")
+	local RunService = game:GetService("RunService")
+	local flyButton = script.Parent -- Assuming the script is a child of the FlyButton
+	local player = game.Players.LocalPlayer
+	
+	local flyEnabled = false
+	local flySpeed = 50 -- Adjust this value to control the flying speed
+	local flying = false
+	
+	-- Function to handle fly movement
+	local function flyMovement()
+		if not flyEnabled or not flying then return end
+	
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+		local camera = workspace.CurrentCamera
+		local moveDirection = Vector3.new()
+	
+		-- Check for WASD input and set the move direction accordingly
+		if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+			moveDirection = moveDirection + (camera.CFrame.LookVector * flySpeed)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+			moveDirection = moveDirection - (camera.CFrame.LookVector * flySpeed)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+			moveDirection = moveDirection - (camera.CFrame.RightVector * flySpeed)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+			moveDirection = moveDirection + (camera.CFrame.RightVector * flySpeed)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+			moveDirection = moveDirection + (camera.CFrame.UpVector * flySpeed)
+		end
+		if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+			moveDirection = moveDirection - (camera.CFrame.UpVector * flySpeed)
+		end
+	
+		-- Apply the move direction to the HumanoidRootPart
+		humanoidRootPart.Velocity = moveDirection
+	end
+	
+	-- Function to toggle fly mode
+	local function toggleFly()
+		flyEnabled = not flyEnabled
+	
+		if flyEnabled then
+			-- Enable fly mode
+			flying = true
+			RunService.RenderStepped:Connect(flyMovement)
+		else
+			-- Disable fly mode
+			flying = false
+			local character = player.Character or player.CharacterAdded:Wait()
+			local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+			humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+		end
+	end
+	
+	-- Connect the flyButton click event to the toggleFly function
+	flyButton.MouseButton1Click:Connect(toggleFly)
+	
+	-- Ensure the fly state persists across character respawns
+	player.CharacterAdded:Connect(function(newCharacter)
+		if flyEnabled then
+			flying = true
+		end
+	end)
+end
+coroutine.wrap(QNSPNQY_fake_script)()
+local function FIMMW_fake_script() -- SpeedButton.LocalScript 
+	local script = Instance.new('LocalScript', SpeedButton)
+
+	-- Define the speed value
+	local speed = 70
+	local speedEnabled = false
+	
+	-- Function to toggle speed on and off
+	local function toggleSpeed()
+		speedEnabled = not speedEnabled
+		if speedEnabled then
+			game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+		else
+			game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16 -- Default speed
+		end
+	end
+	
+	-- Connect toggle function to button click
+	script.Parent.MouseButton1Click:Connect(toggleSpeed)
+	
+	-- Check if player respawns
+	game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+		if speedEnabled then
+			character.Humanoid.WalkSpeed = speed
+		end
+	end)
+	
+	-- Set initial speed when script runs
+	if speedEnabled then
+		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+	end
+end
+coroutine.wrap(FIMMW_fake_script)()
+local function BLULD_fake_script() -- ESPButton.LocalScript 
+	local script = Instance.new('LocalScript', ESPButton)
+
+	local espEnabled = false
+	local refreshRate = 3 -- Refresh ESP every 3 seconds
+	
+	-- Function to create ESP for a player
+	local function createESP(player)
+		if player.Character then
+			local highlight = Instance.new("Highlight")
+			highlight.Name = "ESPHighlight"
+			highlight.Parent = player.Character
+			highlight.FillTransparency = 1 -- Make the fill transparent
+			highlight.OutlineTransparency = 0 -- Make the outline fully visible
+			highlight.OutlineColor = player.TeamColor.Color
+		end
+	end
+	
+	-- Function to remove ESP from a player
+	local function removeESP(player)
+		if player.Character and player.Character:FindFirstChild("ESPHighlight") then
+			player.Character:FindFirstChild("ESPHighlight"):Destroy()
+		end
+	end
+	
+	-- Function to refresh ESP for all players
+	local function refreshESP()
+		for _, player in pairs(game.Players:GetPlayers()) do
+			if player ~= game.Players.LocalPlayer then
+				removeESP(player)
+				if espEnabled then
+					createESP(player)
+				end
+			end
+		end
+	end
+	
+	-- Function to toggle ESP on and off
+	local function toggleESP()
+		espEnabled = not espEnabled
+		if espEnabled then
+			refreshESP()
+		else
+			for _, player in pairs(game.Players:GetPlayers()) do
+				removeESP(player)
+			end
+		end
+	end
+	
+	-- Connect toggle function to button click
+	script.Parent.MouseButton1Click:Connect(toggleESP)
+	
+	-- Handle new players joining and respawning
+	game.Players.PlayerAdded:Connect(function(player)
+		player.CharacterAdded:Connect(function()
+			if espEnabled then
+				createESP(player)
+			end
+		end)
+	end)
+	
+	for _, player in pairs(game.Players:GetPlayers()) do
+		player.CharacterAdded:Connect(function()
+			if espEnabled then
+				createESP(player)
+			end
+		end)
+	end
+	
+	-- Loop to refresh ESP every 3 seconds
+	while true do
+		if espEnabled then
+			refreshESP()
+		end
+		wait(refreshRate)
+	end
+end
+coroutine.wrap(BLULD_fake_script)()
+local function TPSSV_fake_script() -- AimbotButton.LocalScript 
+	local script = Instance.new('LocalScript', AimbotButton)
+
+	local UserInputService = game:GetService("UserInputService")
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local aimbotButton = script.Parent -- Assuming the script is a child of the AimbotButton
+	local player = Players.LocalPlayer
+	
+	local aimbotEnabled = false
+	local aiming = false
+	
+	-- Function to get the closest player to the mouse cursor
+	local function getClosestPlayerToCursor()
+		local mouse = player:GetMouse()
+		local closestPlayer = nil
+		local shortestDistance = math.huge
+	
+		for _, targetPlayer in pairs(Players:GetPlayers()) do
+			if targetPlayer ~= player and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				local targetRootPart = targetPlayer.Character.HumanoidRootPart
+				local screenPoint = workspace.CurrentCamera:WorldToScreenPoint(targetRootPart.Position)
+				local distance = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(screenPoint.X, screenPoint.Y)).magnitude
+	
+				if distance < shortestDistance then
+					shortestDistance = distance
+					closestPlayer = targetPlayer
+				end
+			end
+		end
+	
+		return closestPlayer
+	end
+	
+	-- Function to toggle aimbot on and off
+	local function toggleAimbot()
+		aimbotEnabled = not aimbotEnabled
+	
+		if aimbotEnabled then
+			print("Aimbot enabled")
+		else
+			print("Aimbot disabled")
+		end
+	end
+	
+	-- Function to handle aiming
+	local function aimAtClosestPlayer()
+		if not aiming then return end
+	
+		local closestPlayer = getClosestPlayerToCursor()
+		if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local targetRootPart = closestPlayer.Character.HumanoidRootPart
+			local camera = workspace.CurrentCamera
+	
+			camera.CFrame = CFrame.new(camera.CFrame.Position, targetRootPart.Position)
+		end
+	end
+	
+	-- Connect the aimbotButton click event to the toggleAimbot function
+	aimbotButton.MouseButton1Click:Connect(toggleAimbot)
+	
+	-- Handle right mouse button input to enable and disable aiming
+	UserInputService.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton2 and aimbotEnabled then
+			aiming = true
+			RunService.RenderStepped:Connect(aimAtClosestPlayer)
+		end
+	end)
+	
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton2 then
+			aiming = false
+		end
+	end)
+	
+	-- Ensure the aimbot state persists across character respawns
+	player.CharacterAdded:Connect(function(newCharacter)
+		if aimbotEnabled then
+			aiming = true
+		end
+	end)
+end
+coroutine.wrap(TPSSV_fake_script)()
+local function ITZBDQO_fake_script() -- PredictonButton.LocalScript 
+	local script = Instance.new('LocalScript', PredictonButton)
+
+	local UserInputService = game:GetService("UserInputService")
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local aimbotButton = script.Parent -- Assuming the script is a child of the AimbotButton
+	local player = Players.LocalPlayer
+	
+	local aimbotEnabled = false
+	local aiming = false
+	local predictionFactor = 0.1 -- Adjust this value for more or less prediction accuracy
+	
+	-- Function to get the closest player to the mouse cursor
+	local function getClosestPlayerToCursor()
+		local mouse = player:GetMouse()
+		local closestPlayer = nil
+		local shortestDistance = math.huge
+	
+		for _, targetPlayer in pairs(Players:GetPlayers()) do
+			if targetPlayer ~= player and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				local targetRootPart = targetPlayer.Character.HumanoidRootPart
+				local screenPoint = workspace.CurrentCamera:WorldToScreenPoint(targetRootPart.Position)
+				local distance = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(screenPoint.X, screenPoint.Y)).magnitude
+	
+				if distance < shortestDistance then
+					shortestDistance = distance
+					closestPlayer = targetPlayer
+				end
+			end
+		end
+	
+		return closestPlayer
+	end
+	
+	-- Function to toggle aimbot on and off
+	local function toggleAimbot()
+		aimbotEnabled = not aimbotEnabled
+	
+		if aimbotEnabled then
+			print("Aimbot enabled")
+		else
+			print("Aimbot disabled")
+		end
+	end
+	
+	-- Function to predict player's future position
+	local function predictPlayerPosition(targetPlayer)
+		local targetRootPart = targetPlayer.Character.HumanoidRootPart
+		local velocity = targetRootPart.Velocity
+		local predictionOffset = velocity * predictionFactor
+		return targetRootPart.Position + predictionOffset
+	end
+	
+	-- Function to handle aiming
+	local function aimAtClosestPlayer()
+		if not aiming then return end
+	
+		local closestPlayer = getClosestPlayerToCursor()
+		if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local predictedPosition = predictPlayerPosition(closestPlayer)
+			local camera = workspace.CurrentCamera
+	
+			camera.CFrame = CFrame.new(camera.CFrame.Position, predictedPosition)
+		end
+	end
+	
+	-- Connect the aimbotButton click event to the toggleAimbot function
+	aimbotButton.MouseButton1Click:Connect(toggleAimbot)
+	
+	-- Handle right mouse button input to enable and disable aiming
+	UserInputService.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton2 and aimbotEnabled then
+			aiming = true
+			RunService.RenderStepped:Connect(aimAtClosestPlayer)
+		end
+	end)
+	
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton2 then
+			aiming = false
+		end
+	end)
+	
+	-- Ensure the aimbot state persists across character respawns
+	player.CharacterAdded:Connect(function(newCharacter)
+		if aimbotEnabled then
+			aiming = true
+		end
+	end)
+end
+coroutine.wrap(ITZBDQO_fake_script)()
+local function KRVO_fake_script() -- InvisibleButton.LocalScript 
+	local script = Instance.new('LocalScript', InvisibleButton)
+
+	local Players = game:GetService("Players")
+	local aimbotButton = script.Parent -- Assuming the script is a child of the AimbotButton
+	local player = Players.LocalPlayer
+	
+	local invisible = false
+	
+	-- Function to make the character invisible
+	local function setInvisible(character, value)
+		for _, part in pairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.Transparency = value and 1 or 0 -- Set transparency
+				part.CanCollide = not value -- Set collision
+			elseif part:IsA("Decal") or part:IsA("Texture") then
+				part.Transparency = value and 1 or 0 -- Set transparency for decals and textures
+			elseif part:IsA("BillboardGui") or part:IsA("SurfaceGui") or part:IsA("ImageLabel") or part:IsA("ImageButton") then
+				part.Enabled = not value -- Disable GUI elements
+			end
+		end
+		-- Hide the humanoid name tag
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.DisplayDistanceType = value and Enum.HumanoidDisplayDistanceType.None or Enum.HumanoidDisplayDistanceType.Viewer
+		end
+	end
+	
+	-- Function to toggle invisibility on and off
+	local function toggleInvisibility()
+		invisible = not invisible
+		if player.Character then
+			setInvisible(player.Character, invisible)
+		end
+		print("Invisibility toggled: ", invisible)
+	end
+	
+	-- Connect the aimbotButton click event to the toggleInvisibility function
+	aimbotButton.MouseButton1Click:Connect(toggleInvisibility)
+	
+	-- Ensure the invisibility state persists across character respawns
+	player.CharacterAdded:Connect(function(newCharacter)
+		if invisible then
+			setInvisible(newCharacter, true)
+		end
+	end)
+end
+coroutine.wrap(KRVO_fake_script)()
+local function ZQHUZ_fake_script() -- SWButton.LocalScript 
+	local script = Instance.new('LocalScript', SWButton)
+
+	script.Parent.MouseButton1Click:Connect(function()
+		local frame = script.Parent.Parent.Frame
+		frame.Visible = not frame.Visible
+	end)
+end
+coroutine.wrap(ZQHUZ_fake_script)()
+local function NKOPNT_fake_script() -- NewStormWareV1.LocalScript 
+	local script = Instance.new('LocalScript', NewStormWareV1)
+
+	-- Define the UI creation function
+	local function createUI()
+		-- Create your UI elements here
+		-- Example:
+		local uiFrame = Instance.new("Frame")
+		uiFrame.Size = UDim2.new(0, 200, 0, 50)
+		uiFrame.Position = UDim2.new(0.5, -100, 0, 20)
+		uiFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+		uiFrame.BorderSizePixel = 2
+		uiFrame.Parent = game.Players.LocalPlayer.PlayerGui
+	end
+	
+	-- Function to handle player respawn
+	local function onPlayerRespawn()
+		-- Check if the UI already exists (e.g., after respawn)
+		local existingUI = game.Players.LocalPlayer.PlayerGui:FindFirstChild("YourUINameHere")
+	
+		if not existingUI then
+			-- UI doesn't exist, create it
+			createUI()
+		end
+	end
+	
+	-- Connect the function to the player's respawn event
+	game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+		character:WaitForChild("Humanoid").Died:Connect(onPlayerRespawn)
+	end)
+	
+	-- Call createUI initially when the script runs (in case UI was missing at start)
+	createUI()
+end
+coroutine.wrap(NKOPNT_fake_script)()
