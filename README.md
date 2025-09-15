@@ -1,0 +1,1 @@
+my first ever script. no this is not a public script bcz this is ass. dont use this because its VERY detected, only use on an alt account but i still wouldnt use this if i was u lol thats how horrible it is but feel free to test it out
